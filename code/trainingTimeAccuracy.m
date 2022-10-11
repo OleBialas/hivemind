@@ -1,4 +1,4 @@
-function [accSpec, accGen, bestLambdas] = genericVSspecific()
+function [accSpec, accGen, bestLambdas] = genericVSspecific(fname)
 % Compute the prediction accuracy for each subject across various amounts
 % of training data. For every unique training duration, the same randomly
 % picked training data are used for specific and generic models and across
@@ -10,8 +10,12 @@ function [accSpec, accGen, bestLambdas] = genericVSspecific()
 % prediction accuracy of subject-specific and generic models, and 
 % bestLambdas contain the values for lambda that resulted in highest accuracy.
 %
+% If the optional argument fname is defined, the result will be saved in
+% a structure under that name in the results folder.
+%
 % This function should be executed multiple times to obtain a bootstrapped 
-% permutation distribution of the prediction accuracies for each training duration
+% permutation distribution of the prediction accuracies for each training duration.
+
 % ---- Model Features ----
 dataSet = 'oldman'; % dataset to use
 nSubjects = 19;
@@ -118,3 +122,8 @@ for ifeat = 1:length(features)
             accGen(isub, idur) = mean(stats.r(:,chs), 'all');
         end
     end
+    % save the result if a filename was specified
+    if exist('opt')
+        disp('ay');
+    end
+
