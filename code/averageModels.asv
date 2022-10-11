@@ -8,5 +8,3 @@ function avgModel = averageModels(models)
     avgModel = struct('w',wbar,'b',bbar,'t',t,'fs',fs,'Dir',Dir,'type',type);
 
     % Aw. You improved the readability. :(
-    % We could slap a coat of paint (input checking, some features) on this
-    % and put it in mTRFtoolbox.

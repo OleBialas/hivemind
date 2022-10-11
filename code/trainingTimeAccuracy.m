@@ -1,4 +1,4 @@
-function [accSpec, accGen, bestLambdas] = genericVSspecific(fname)
+function [accSpec, accGen, bestLambdas] = trainingTimeAccuracy(fname)
 % Compute the prediction accuracy for each subject across various amounts
 % of training data. For every unique training duration, the same randomly
 % picked training data are used for specific and generic models and across
@@ -49,6 +49,8 @@ for ifeat = 1:length(features)
     spg = features(ifeat, 2);
     ons = features(ifeat, 3);
     pho = features(ifeat, 4);
+    % Preallocate Model
+    [models,genModels, indModels] = deal(struct('w',[],'b',[],'t',[],'fs',[],'Dir',[],'type',[]));
     % train one model per subject, lambda and segment
     for isub = 1:nSubjects
         subject = strcat('sub', num2str(isub,'%02.f'));
@@ -66,7 +68,7 @@ for ifeat = 1:length(features)
     % duration using the lambda value that yields the highest accuracy.
     bestLambdas = zeros(nSubjects, length(trainDur));
     % split into test and training data
-    idx = randperm(size(stim,1)) % randomize trial indices
+    idx = randperm(size(stim,1)); % randomize trial indices
     idxTest = idx(end-(testDur/segDur)+1:end); % use the last trial for testing...
     idxTrainAll = idx(1:end-(testDur/segDur)); % ... and the rest for training
     for idur = 1:length(trainDur)
@@ -80,13 +82,13 @@ for ifeat = 1:length(features)
                     cvTrain = idxTrain(setdiff(1:end,icv));
                     % select and average the models corresponding to training trials
                     cvModel = averageModels(models(isub, ilam, cvTrain));
-                    [pred, stats] = mTRFpredict(stim(cvValid), resp(cvValid),...
+                    [~, stats] = mTRFpredict(stim(cvValid), resp(cvValid),...
                         cvModel, 'verbose', 0);
                     lambdasR(icv, ilam) = mean(stats.r(:, chs), 'all');
                 end
             end
             % pick the best-lambda model
-            [m,ilam] = max(mean(lambdasR, 1));
+            [~,ilam] = max(mean(lambdasR, 1));
             bestLambdas(isub, idur) = lambdas(ilam);
             indModels(idur, isub) = averageModels(models(isub, ilam, idxTrain));
         end
@@ -94,7 +96,7 @@ for ifeat = 1:length(features)
         % across all except the respective subject) using the mode of best
         % kambda acros all subjects for a given training duration.
         genLambda = mode(bestLambdas(:, idur));
-        ilam = find(lambdas == genLambda);
+        ilam = lambdas == genLambda; % ARN Removed find(), logical indexing faster
         for isub = 1:nSubjects % find the best lambda for each subject
             subjects = 1:nSubjects;
             subjects = setdiff(subjects, isub); % all subjects except isub
@@ -106,24 +108,30 @@ for ifeat = 1:length(features)
     accInd = zeros(nSubjects, length(trainDur));
     accGen = zeros(nSubjects, length(trainDur));
     for isub = 1:nSubjects
-        isub
+        isub; % is this to display the subject number or a debug thing? if
+        % former, if you're a chad I would use fpritnf('%d',isub) or otherwise disp(isub)
         subject = strcat('sub', num2str(isub,'%02.f'));
         [stim, resp] = loadData(subject, dataSet, 'dur', segDur, 'skip', skip,...
             'toFs', fs, 'cutoffHigh', cutoffHigh, 'cutoffLow', cutoffLow,...
             'loadEnv', env, 'loadSpg', spg, 'loadOns', ons, 'loadPho', pho);
         for idur = 1:length(trainDur)
             % test subject-specific model
-            [pred, stats] = mTRFpredict(stim(idxTest), resp(idxTest),...
+            [~, stats] = mTRFpredict(stim(idxTest), resp(idxTest),...
                 indModels(idur, isub), 'verbose', 0);
             accInd(isub, idur) = mean(stats.r(:,chs), 'all');
             % test generic model
-            [pred, stats] = mTRFpredict(stim(idxTest), resp(idxTest),...
+            [~, stats] = mTRFpredict(stim(idxTest), resp(idxTest),...
                 genModels(idur, isub), 'verbose', 0);
             accGen(isub, idur) = mean(stats.r(:,chs), 'all');
         end
     end
-    % save the result if a filename was specified
-    if exist('opt')
-        disp('ay');
-    end
+    
+end % Added ARN Check to see if this is in the right spot by your eye.
+
+% save the result if a filename was specified
+if exist('opt') % when you finish this, you should specify the second input
+                % 'var' so it doesn't look through the searchpath and accidentally
+                % find a match for fname
+    disp('ay');
+end
 
