@@ -1,14 +1,19 @@
 function gatherFiles(pattern, fname)
+% Combine all matrices returned by different runs of `trainingTimeAccuracy.m` and write them
+% into a single table. That table is saved in the results folder under the name specified by
+% the parameter FNAME. The parameter PATTERN defines a string pattern which is used to find
+% the files to combine (e.g. PATTERN='*envModel*' will load all files that have that pattern
+% in their filename. All files loaded by this script will be deleted.
 
 files = dir(fullfile('../results/', pattern));
 varnames = {'Permutation', 'TrainDur', 'Subject', 'BestLambda', 'SpecAccuracy', 'GenAccuracy'};
 table = array2table(zeros(0, length(varnames)), 'VariableNames', varnames);
-for f = length(files)
+for f = 1:length(files)
     load(fullfile(files(f).folder, files(f).name))
-    for idur = length(trainDur) % combine variables into one array and append it to the table
+    for idur = 1:length(trainDur) % combine variables into one array and append it to the table
         data = [repelem(f, size(accGen, 1)); repelem(trainDur(idur), size(accGen, 1));...
-            1:size(accGen, 1); bestLambdas(:, idur)'; accSpec(:, idur)'; accGen(:,idur)']'
-        table = [table; array2table(data, 'VariableNames', varnames)]
+            1:size(accGen, 1); bestLambdas(:, idur)'; accSpec(:, idur)'; accGen(:,idur)']';
+        table = [table; array2table(data, 'VariableNames', varnames)];
     end
     delete(fullfile(files(f).folder, files(f).name))
     writetable(table, fullfile('../results', fname))
