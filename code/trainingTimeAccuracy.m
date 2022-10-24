@@ -22,9 +22,9 @@ function [accSpec, accGen, bestLambdas] = trainingTimeAccuracy(feats, fname, see
 % permutation distribution of the prediction accuracies for each training duration.
 if exist('seed', 'var') % set seed for random number generator
     if ischar(seed)
-        seed = str2num(seed)
+        seed = str2num(seed);
     end
-    rng(seed)
+    rng(seed);
 end
 
 % ---- Model Features ----
@@ -47,7 +47,9 @@ lambdas = logspace(-1, 5, 10);
 % ---- Training parameters ----
 % total duration of training data in seconds
 trainDur = [10, 20, 30, 40, 50, 60, 150, 300, 600, 900, 1200, 1500, 1800, 2100, 3000];
-testDur = 300;  % duration of the data for testing the effect of lambda chs = 1:128; % channels for determining prediction accuracy ---- Preprocessing parameters ---
+testDur = 300;  % duration of the data for testing the effect of lambda
+chs = 1:128; % channels for determining prediction accuracy
+% ---- Preprocessing parameters ---
 segDur = 5; % duration of single segment after reshaping
 cutoffHigh = 20; % lowpass frequency in Hz
 cutoffLow = 1; % highpass frequency in Hz
