@@ -22,15 +22,16 @@ function [stim,resp]=loadData(sub,dset,varargin)
 %   'loadEnv'       If true, load the broadband envelopes.
 %   'loadOns'       If true, load the acoustic onets.
 %   'loadSpg'       If true, load the 16-band spectrograms
-%   'loadPhe'       If true load the 19 phonetic features
-%   'loadPho'       If true load the 39 Phonemes
+%   'loadPhe'       If true, load the 19 phonetic features
+%   'loadPho'       If true, load the 39 Phonemes
+%   'loadSem'       If true, load the semantic surprisal vector
 %
 % The shape of STIM depends on the stimulus features selcted. When
 % selcting all features, STIM has 76 columns where the first column
 % contains the envelope, columns 2-17 contain the 16-band spectrogram,
 % column 18 contains the acoustic onsets, columns 19-37 contain the
-% phonetic features and the last 39 columns contain the phonemes
-%TODO: fix resampling for stick functions!
+% phonetic features, columns 38-76 contain the phonemes and the last
+% column contains the semantic surprisal vector
 
 args = parsevarargin(varargin);
 subDir = fullfile('../data/preprocessed/', dset, sub);
@@ -65,8 +66,8 @@ for ii = 1:length(eegFiles)
     end
     if args.toFs
         eegData = resample(eegData, args.toFs, fs);
-        [env, spg, ons, phe, pho] = resampleFeats(...
-            env, spg, ons, phe, pho, fs, args.toFs);
+        [env, spg, ons, phe, pho, sem] = resampleFeats(...
+            env, spg, ons, phe, pho, sem, fs, args.toFs);
         fs = args.toFs;
     end
 	feats = {};
@@ -85,6 +86,9 @@ for ii = 1:length(eegFiles)
 	if args.loadPho
 		feats = [feats; pho];
 	end
+    if args.loadSem
+		feats = [feats; sem];
+    end
 	feats = cat(2, feats{:}); % concatenate to one matrix
     nfeats = size(feats, 2);
 	if length(feats) < length(eegData)
@@ -110,8 +114,8 @@ for ii = 1:length(eegFiles)
 end
 
 
-function [envOut, spgOut, onsOut, pheOut, phoOut] = resampleFeats(...
-        envIn, spgIn, onsIn, pheIn, phoIn, fromFs, toFs)
+function [envOut, spgOut, onsOut, pheOut, phoOut, semOut] = resampleFeats(...
+        envIn, spgIn, onsIn, pheIn, phoIn, semIn, fromFs, toFs)
 
 % resample continuous envelope and spectrogram
 envOut = resample(envIn, toFs, fromFs);
@@ -141,7 +145,10 @@ for iphe = 1:size(pheIn,2)
         pheOut(starts(ii):stops(ii), iphe) = 1;
     end
 end
-
+%resample the semantic surprisal vector
+semOut = zeros(size(envOut));
+wordOns = round((find(semIn)/fromFs)*toFs);
+semOut(wordOns) = semIn(find(semIn));
 
 function args = parsevarargin(varargin)
 %PARSEVARARGIN  Parse input arguments.
@@ -167,6 +174,7 @@ addParameter(p,'loadOns',false,validFcn); % load onsets
 addParameter(p,'loadSpg',false,validFcn); % load spectrograms
 addParameter(p,'loadPhe',false,validFcn); % load phonetic features
 addParameter(p,'loadPho',false,validFcn); % load phonetic features
+addParameter(p,'loadSem',false,validFcn); % load phonetic features
 addParameter(p,'normalize',true,validFcn); % normalize eeg, envelopes and spectrogram
 
 % Parse input arguments
