@@ -20,8 +20,10 @@ function [accSpec, accGen, bestLambdas] = trainingTimeAccuracy(feats, fname, see
 %
 % This function should be executed multiple times to obtain a bootstrapped 
 % permutation distribution of the prediction accuracies for each training duration.
-
-if exist('fname', 'seed') % set seed for random number generator
+if exist('seed', 'var') % set seed for random number generator
+    if ischar(seed)
+        seed = str2num(seed)
+    end
     rng(seed)
 end
 
