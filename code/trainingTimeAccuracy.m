@@ -44,13 +44,13 @@ tmax = 400;
 lambdas = logspace(-1, 5, 10);
 % ---- Training parameters ----
 % total duration of training data in seconds
-trainDur = [10, 20, 30, 40, 50 60, 150, 300, 600, 900, 1200, 1500, 1800, 2100];
+trainDur = [10, 20, 30, 40, 50, 60, 150, 300, 600, 900, 1200, 1500, 1800, 2100, 3000];
 testDur = 300;  % duration of the data for testing the effect of lambda chs = 1:128; % channels for determining prediction accuracy ---- Preprocessing parameters ---
 segDur = 5; % duration of single segment after reshaping
 cutoffHigh = 20; % lowpass frequency in Hz
 cutoffLow = 1; % highpass frequency in Hz
 skip = 1; % Duration of the initial segment to skip, in seconds
-fs = 128; % Frequency to which data is resampled iin Hz TODO: fix resampling
+fs = 64; % Frequency to which data is resampled iin Hz
 
 % Preallocate Model
 [models,genModels, indModels] = deal(struct(...
