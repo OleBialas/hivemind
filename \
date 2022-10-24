@@ -8,6 +8,7 @@ function [fitresult, gof] = createFit(x, y, show)
 ft = fittype( 'power2' );
 opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
 opts.Display = 'Off';
+opts.StartPoint = [0 0 0]
 %opts.StartPoint = [0.00444907476924962 0.379792900228052 -0.00131725834264842];
 opts.Upper = [0 Inf Inf];
 
@@ -16,9 +17,10 @@ opts.Upper = [0 Inf Inf];
 
 % Plot fit with data.
 if show
-    %figure( 'Name', 'fitPowerFun' );
+    figure( 'Name', 'fitPowerFun' );
     h = plot( fitresult, xData, yData );
     legend( h, 'y vs. x', 'fitPowerFun', 'Location', 'NorthEast', 'Interpreter', 'none' );
+    Label axes
     xlabel( 'x', 'Interpreter', 'none' );
     ylabel( 'y', 'Interpreter', 'none' );
     grid on

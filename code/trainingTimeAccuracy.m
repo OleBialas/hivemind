@@ -1,4 +1,4 @@
-function [accSpec, accGen, bestLambdas] = trainingTimeAccuracy(feats, fname)
+function [accSpec, accGen, bestLambdas] = trainingTimeAccuracy(feats, fname, seed)
 % Compute the prediction accuracy for each subject across various amounts
 % of training data. For every unique training duration, the same randomly
 % picked training data are used for specific and generic models and across
@@ -20,6 +20,11 @@ function [accSpec, accGen, bestLambdas] = trainingTimeAccuracy(feats, fname)
 %
 % This function should be executed multiple times to obtain a bootstrapped 
 % permutation distribution of the prediction accuracies for each training duration.
+
+if exist('fname', 'seed') % set seed for random number generator
+    rng(seed)
+end
+
 % ---- Model Features ----
 dataSet = 'oldman'; % dataset to use
 nSubjects = 19;
@@ -28,8 +33,8 @@ nSubjects = 19;
 %feats = [true false false false];
 % ---- Parse model feature arguments %
 if ischar(feats)
-    feats=char(num2cell(feats))
-    feats=reshape(str2num(feats),1,[])
+    feats=char(num2cell(feats));
+    feats=reshape(str2num(feats),1,[]);
 end
 
 % ---- TRF hyperparameters ----
@@ -39,16 +44,13 @@ tmax = 400;
 lambdas = logspace(-1, 5, 10);
 % ---- Training parameters ----
 % total duration of training data in seconds
-trainDur = [30];
-%trainDur = [30, 60, 150, 300, 600, 900, 1200, 1500, 1800, 2100]
-testDur = 300;  % duration of the data for testing the effect of lambda
-chs = 1:128; % channels for determining prediction accuracy
-% ---- Preprocessing parameters ---
-segDur = 10; % duration of single segment after reshaping
+trainDur = [10, 20, 30, 40, 50 60, 150, 300, 600, 900, 1200, 1500, 1800, 2100];
+testDur = 300;  % duration of the data for testing the effect of lambda chs = 1:128; % channels for determining prediction accuracy ---- Preprocessing parameters ---
+segDur = 5; % duration of single segment after reshaping
 cutoffHigh = 20; % lowpass frequency in Hz
 cutoffLow = 1; % highpass frequency in Hz
 skip = 1; % Duration of the initial segment to skip, in seconds
-fs = 64; % Frequency to which data is resampled iin Hz
+fs = 128; % Frequency to which data is resampled iin Hz TODO: fix resampling
 
 % Preallocate Model
 [models,genModels, indModels] = deal(struct(...
@@ -57,9 +59,9 @@ fs = 64; % Frequency to which data is resampled iin Hz
 for isub = 1:nSubjects
     subject = strcat('sub', num2str(isub,'%02.f'));
     [stim, resp] = loadData(subject, dataSet, 'dur', segDur, 'skip', skip,...
-        'toFs', fs, 'cutoffHigh', cutoffHigh, 'cutoffLow', cutoffLow,...
+        'toFs', false, 'cutoffHigh', cutoffHigh, 'cutoffLow', cutoffLow,...
         'loadEnv', feats(1), 'loadSpg', feats(2), 'loadOns', feats(3),...
-        'loadPho', feats(4));
+        'loadPhe', feats(4), 'loadPho', feats(5));
     for ilam = 1:length(lambdas)
         for iseg = 1:size(stim,1)
             models(isub, ilam, iseg) = mTRFtrain(stim{iseg}, resp{iseg},...

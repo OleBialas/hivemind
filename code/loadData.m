@@ -22,20 +22,23 @@ function [stim,resp]=loadData(sub,dset,varargin)
 %   'loadEnv'       If true, load the broadband envelopes.
 %   'loadOns'       If true, load the acoustic onets.
 %   'loadSpg'       If true, load the 16-band spectrograms
-%   'loadPho'       If true load the phonetic features
+%   'loadPhe'       If true load the 19 phonetic features
+%   'loadPho'       If true load the 39 Phonemes
 %
 % The shape of STIM depends on the stimulus features selcted. When
-% selcting all features, STIM has 37 columns where the first column
+% selcting all features, STIM has 76 columns where the first column
 % contains the envelope, columns 2-17 contain the 16-band spectrogram,
-% column 18 contains the acoustic onsets and columns 19-37 contain the
-% phonetic features
+% column 18 contains the acoustic onsets, columns 19-37 contain the
+% phonetic features and the last 39 columns contain the phonemes
+%TODO: fix resampling for stick functions!
+
 args = parsevarargin(varargin);
 subDir = fullfile('../data/preprocessed/', dset, sub);
 eegFiles = dir(fullfile(subDir, '/*run*.mat'));
 
 resp = {};
 stim = {};
-for ii = 1:length(eegFiles)-1
+for ii = 1:length(eegFiles)
 	load(fullfile(...
 		eegFiles(ii).folder, eegFiles(ii).name));
     if args.cutoffLow
@@ -57,25 +60,27 @@ for ii = 1:length(eegFiles)-1
         join(['audio', eegFiles(ii).name(10:11), '.mat'])));
 	if args.normalize
 		eegData = (eegData-mean(eegData))./std(eegData);
-		env = {env{1}./mean(env{1}.^2)^0.5};
-		spg = {spg{1}./mean(spg{1}.^2).^0.5};
+		env = env./mean(env.^2)^0.5;
+		spg = spg./mean(spg.^2, 'all').^0.5;
     end
 	feats = {};
 	if args.loadEnv
 		feats = [feats; env];
 	end
+	if args.loadSpg
+		feats = [feats; spg];
+	end
 	if args.loadOns
 		feats = [feats; ons];
 	end
-	if args.loadSpg
-		feats = [feats; spg];
+	if args.loadPhe
+		feats = [feats; phe];
 	end
 	if args.loadPho
 		feats = [feats; pho];
 	end
 	feats = cat(2, feats{:}); % concatenate to one matrix
-    s = size(feats);
-    n_feats = s(end);
+    nfeats = size(feats, 2);
 	if length(feats) < length(eegData)
 		eegData = eegData(1:length(feats),:);
 	else
@@ -96,7 +101,7 @@ for ii = 1:length(eegFiles)-1
 	feats = feats(1:length(feats)-toCut, :);
 	nTrials = length(eegData) / (args.dur*fs);
 	eegData = permute(reshape(eegData,[args.dur*fs, nTrials, 128]),[2 1 3]);
-	feats = permute(reshape(feats, [args.dur*fs, nTrials, n_feats]), [2 1 3]);
+	feats = permute(reshape(feats, [args.dur*fs, nTrials, nfeats]), [2 1 3]);
 	for it=1:nTrials
 		resp=[resp; squeeze(eegData(it, :, :))];
 		stim=[stim; squeeze(feats(it, :, :))];
@@ -126,6 +131,7 @@ validFcn = @(x) assert(x==0||x==1||islogical(x),errorMsg);
 addParameter(p,'loadEnv',false,validFcn); % load envelopes
 addParameter(p,'loadOns',false,validFcn); % load onsets
 addParameter(p,'loadSpg',false,validFcn); % load spectrograms
+addParameter(p,'loadPhe',false,validFcn); % load phonetic features
 addParameter(p,'loadPho',false,validFcn); % load phonetic features
 addParameter(p,'normalize',true,validFcn); % normalize eeg, envelopes and spectrogram
 
