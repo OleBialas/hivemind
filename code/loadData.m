@@ -160,11 +160,14 @@ p = inputParser;
 
 errorMsg = 'It must be a positive integer scalar.';
 validFcn = @(x) assert(rem(x,1)==0,errorMsg);
-addParameter(p,'dur',5,validFcn);
 addParameter(p,'cutoffLow',false,validFcn);  % lower filter cutoff
 addParameter(p,'cutoffHigh',false,validFcn); % upper filter cutoff
 addParameter(p,'toFs',false,validFcn); % resampling samplerate
 addParameter(p,'skip',1,validFcn); % Initial segment to skip
+
+errorMsg = 'It must be a positive scalar.';
+validFcn = @(x) assert(isnumeric(x)&x>0,errorMsg);
+addParameter(p,'dur',5,validFcn);
 
 % Boolean arguments
 errorMsg = 'It must be a numeric scalar (0,1) or logical.';
