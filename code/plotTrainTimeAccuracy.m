@@ -39,22 +39,17 @@ for ife = 1:length(feats)
         plot(x, mean(aG)*x.^mean(bG)+mean(cS))
 
 
+% test the model fits
+fname = append(featNames(ife), 'AccTime.csv');
+T = readtable(fullfile('../results', fname));
+T = T(T.Subject==sub,:);
+stats = grpstats(T, 'TrainDur', 'mean');
+x = stats.TrainDur
+y = stats.mean_SpecAccuracy
 
-x = 1 : 300;
-curve1 = log(x);
-curve2 = 2*log(x);
-plot(x, curve1, 'r', 'LineWidth', 2);
-hold on;
-plot(x, curve2, 'b', 'LineWidth', 2);
-x2 = [x, fliplr(x)];
-inBetween = [curve1, fliplr(curve2)];
-fill(x2, inBetween, 'g');
 
-        yUpper = quantile(yResampled, .975, 2);
-        yLower = quantile(y, .025, 2);
-        
-    end
-end
+
+
 
 
 function y = genSamples(x, a, b, c)

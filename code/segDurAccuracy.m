@@ -1,7 +1,8 @@
-function results = segDurAccuracy(sub, fname)
+function results = segDurAccuracy(sub)
 % test how segment duration affects prediction accuracy
 dataSet = 'oldman'; % dataset to use
-subject = strcat('sub', num2str(isub,'%02.f'));
+subject = strcat('sub', num2str(str2num(sub),'%02.f'));
+fname = fullfile('../results/', strcat('segDurAcc_',subject,'.m'))
 nPermute = 100;
 % ---- TRF hyperparameters ----
 direction = 1;
@@ -47,10 +48,4 @@ for isd = 1:length(segDur)
             results(ip, isd, ife) = mean(stats.r, 'all');
         end
     end
-end
-
-% save the result if a filename was specified
-if exist('fname', 'var')
-    fname = fullfile('../results/', fname);
-    save(fname, 'segDur', 'results')
 end
