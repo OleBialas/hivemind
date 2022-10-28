@@ -4,7 +4,7 @@ function gatherFiles(pattern, fname)
 % the parameter FNAME. The parameter PATTERN defines a string pattern which is used to find
 % the files to combine (e.g. PATTERN='*envModel*' will load all files that have that pattern
 % in their filename. All files loaded by this script will be deleted.
-
+trainDur = [10, 20, 30, 40, 50, 60, 150, 300, 600, 900, 1200, 1500, 1800, 2100, 3000];
 files = dir(fullfile('../results/', pattern));
 varnames = {'Permutation', 'TrainDur', 'Subject', 'BestLambda', 'SpecAccuracy', 'GenAccuracy'};
 table = array2table(zeros(0, length(varnames)), 'VariableNames', varnames);
