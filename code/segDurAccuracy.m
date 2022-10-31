@@ -26,11 +26,9 @@ featNames = ["env" "spg" "ons" "phe" "pho" "sem"];
 results = zeros(nPermute, length(segDur), length(featIdx));
 
 for isd = 1:length(segDur)
-    disp(isd)
     [stim, resp] = loadData(subject, dataSet, 'dur', segDur(isd), 'skip', skip,...
         'toFs', fs, 'cutoffHigh', cutoffHigh, 'cutoffLow', cutoffLow,...
         'loadEnv', 1, 'loadSpg', 1, 'loadOns', 1, 'loadPhe', 1, 'loadPho', 1, 'loadSem', 1);
-    
     for ip = 1:nPermute
         idx = randperm(size(stim,1)); % randomize trial indices
         idxTest = idx(1:(testDur/segDur(isd)));
@@ -49,3 +47,4 @@ for isd = 1:length(segDur)
         end
     end
 end
+save(fname, 'trainDur', 'testDur', 'segDur', 'featNames', 'results')

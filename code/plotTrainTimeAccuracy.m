@@ -46,8 +46,11 @@ T = T(T.Subject==sub,:);
 stats = grpstats(T, 'TrainDur', 'mean');
 x = stats.TrainDur
 y = stats.mean_SpecAccuracy
-
-
+[fitresult, gof] = fit(x, y, ft, opts );
+hold on
+plot(fitresult, x, y)
+y2 = fit_logistic(log(x), y)
+plot(log(x), y2)
 
 
 
