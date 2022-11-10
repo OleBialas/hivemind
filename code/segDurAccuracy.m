@@ -1,14 +1,14 @@
 % ---- Training parameters ----
 dataSet = 'oldman'; % dataset to use
-fname='segDurPhe.csv';
-nPermute = 100;  % number of permutations
+fname='segDurOns.csv';
+nPermute = 10;  % number of permutations
 segDur = [0.5, 1, 2, 3, 4, 5, 10, 20, 30, 40, 60, 80, 160]; % length of data segments 
 trainDur = 2400;  % duration of training data
 testDur = 480;  % duration of the data for testing the effect of lambda
 chs = 1:128; % channels for determining prediction accuracy
 lambda = 100;
 % ---- TRF hyperparameters ----
-feats = [0 0 0 0 1 0];
+feats = [0 0 1 0 0 0];
 direction = 1;
 tmin = 0;
 tmax = 400;
